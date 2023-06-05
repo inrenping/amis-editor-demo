@@ -1,14 +1,15 @@
 import React from 'react';
-import {Editor, ShortcutKey} from 'amis-editor';
-import {inject, observer} from 'mobx-react';
-import {RouteComponentProps} from 'react-router-dom';
-import {toast, Select} from 'amis';
-import {currentLocale} from 'i18n-runtime';
-import {Icon} from '../icons/index';
-import {IMainStore} from '../store';
+import { Editor, ShortcutKey } from 'amis-editor';
+import { inject, observer } from 'mobx-react';
+import { RouteComponentProps } from 'react-router-dom';
+import { toast, Select } from 'amis';
+import { currentLocale } from 'i18n-runtime';
+import { Icon } from '../icons/index';
+import { IMainStore } from '../store';
 import '../editor/DisabledEditorPlugin'; // 用于隐藏一些不需要的Editor预置组件
 import '../renderer/MyRenderer';
 import '../editor/MyRenderer';
+import axios from "axios";
 
 let currentIndex = -1;
 
@@ -40,7 +41,7 @@ export default inject('store')(
     location,
     history,
     match
-  }: {store: IMainStore} & RouteComponentProps<{id: string}>) {
+  }: { store: IMainStore } & RouteComponentProps<{ id: string }>) {
     const index: number = parseInt(match.params.id, 10);
     const curLanguage = currentLocale(); // 获取当前语料类型
 
@@ -51,7 +52,14 @@ export default inject('store')(
 
     function save() {
       store.updatePageSchemaAt(index);
-      toast.success('保存成功', '提示');
+      // toast.success('保存成功', '提示');
+      axios.post("https://api.inrenping.com/amisconfig/save", store.pages[index]).then(resp => {
+        console.log(resp)
+        toast.success('保存成功', '提示');
+      }).catch(error => {
+        console.log(error)
+        toast.error('保存失败', '提示');
+      })
     }
 
     function onChange(value: any) {
@@ -75,9 +83,8 @@ export default inject('store')(
           <div className="Editor-view-mode-group-container">
             <div className="Editor-view-mode-group">
               <div
-                className={`Editor-view-mode-btn editor-header-icon ${
-                  !store.isMobile ? 'is-active' : ''
-                }`}
+                className={`Editor-view-mode-btn editor-header-icon ${!store.isMobile ? 'is-active' : ''
+                  }`}
                 onClick={() => {
                   store.setIsMobile(false);
                 }}
@@ -85,9 +92,8 @@ export default inject('store')(
                 <Icon icon="pc-preview" title="PC模式" />
               </div>
               <div
-                className={`Editor-view-mode-btn editor-header-icon ${
-                  store.isMobile ? 'is-active' : ''
-                }`}
+                className={`Editor-view-mode-btn editor-header-icon ${store.isMobile ? 'is-active' : ''
+                  }`}
                 onClick={() => {
                   store.setIsMobile(true);
                 }}
@@ -107,14 +113,16 @@ export default inject('store')(
               onChange={(e: any) => changeLocale(e.value)}
             />
             <div
-              className={`header-action-btn m-1 ${
-                store.preview ? 'primary' : ''
-              }`}
+              className={`header-action-btn m-1 ${store.preview ? 'primary' : ''
+                }`}
               onClick={() => {
                 store.setPreview(!store.preview);
               }}
             >
               {store.preview ? '编辑' : '预览'}
+            </div>
+            <div className={`header-action-btn primary`} onClick={save}>
+              保存配置
             </div>
             {!store.preview && (
               <div className={`header-action-btn exit-btn`} onClick={exit}>

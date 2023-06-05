@@ -1,6 +1,7 @@
-import {types, getEnv, applySnapshot, getSnapshot} from 'mobx-state-tree';
-import {PageStore} from './Page';
-import {when, reaction} from 'mobx';
+import { types, getEnv, applySnapshot, getSnapshot } from 'mobx-state-tree';
+import { PageStore } from './Page';
+import { when, reaction } from 'mobx';
+import axios, { AxiosResponse } from "axios";
 let pagIndex = 1;
 export const MainStore = types
   .model('MainStore', {
@@ -66,7 +67,9 @@ export const MainStore = types
       self.pages.push(
         PageStore.create({
           ...data,
-          id: `${++pagIndex}`
+          // 生成 ID 用随机数
+          id: `${new Date().getTime()}`
+          // id: `${++pagIndex}`
         })
       );
     }
@@ -107,7 +110,56 @@ export const MainStore = types
         if (typeof window !== 'undefined' && window.localStorage) {
           const storeData = window.localStorage.getItem('store');
           if (storeData) applySnapshot(self, JSON.parse(storeData));
+          console.log(storeData);
 
+          var jsonObject = {};
+          axios.get('https://api.inrenping.com/amisconfig/getlist').then((resp) => {
+            console.log(resp.data);
+
+            var pages = [];
+            // resp.data.forEach(element => {
+            for (const key in resp.data) {
+              if (isValidKey(key, resp.data)) {
+                pages.push({
+                  id: resp.data[key].id + '',
+                  icon: resp.data[key].icon,
+                  path: resp.data[key].path,
+                  label: resp.data[key].label,
+                  schema: JSON.parse(resp.data[key].schema)
+                })
+              }
+            }
+            jsonObject = {
+              pages: pages,
+              theme: "cxd",
+              asideFixed: true,
+              asideFolded: false,
+              offScreen: false,
+              addPageIsOpen: false,
+              preview: false,
+              isMobile: false,
+              schema: {
+                type: "page",
+                title: "1",
+                body: [
+                  {
+                    type: "tpl",
+                    tpl: "这是你刚刚新增的页面。",
+                    inline: false,
+                    id: "u:5d9b59aee042"
+                  }
+                ],
+                id: "u:a62c0923ad94"
+              }
+            }
+            console.log(jsonObject)
+            const jsonString = JSON.stringify(jsonObject);
+            console.log(jsonString)
+            applySnapshot(self, JSON.parse(jsonString));
+
+          }).catch(error => {
+            console.log(error)
+          })
           reaction(
             () => getSnapshot(self),
             json => {
@@ -118,5 +170,12 @@ export const MainStore = types
       }
     };
   });
+
+export function isValidKey(
+  key: string | number | symbol,
+  object: object
+): key is keyof typeof object {
+  return key in object;
+}
 
 export type IMainStore = typeof MainStore.Type;

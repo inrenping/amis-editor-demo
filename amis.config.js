@@ -11,7 +11,7 @@ module.exports = {
   webpack: {
     resolve: {
       // webpack的resolve配置
-      extensions: ['.js', '.jsx', '.ts', '.tsx','.esm.js', '.umd.js', '.min.js', '.json'], // 用于配置webpack在尝试过程中用到的后缀列表
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.esm.js', '.umd.js', '.min.js', '.json'], // 用于配置webpack在尝试过程中用到的后缀列表
       alias: {
         '@': resolve('src'),
         // $function: resolve('src/function'),
@@ -33,7 +33,7 @@ module.exports = {
   dev: {
     entry: { // 本地调试模式的入口
       index: './src/index.tsx',
-      editor:  './src/mobile.tsx',
+      editor: './src/mobile.tsx',
     },
     // 用于开启本地调试模式的相关配置信息
     NODE_ENV: 'development',
@@ -50,12 +50,13 @@ module.exports = {
   build: {
     entry: { // webpack构建入口
       index: './src/index.tsx',
-      editor:  './src/mobile.tsx',
+      editor: './src/mobile.tsx',
     },
     // 用于构建生产环境代码的相关配置信息
     NODE_ENV: 'production',
     assetsRoot: resolve('./demo'), // 打包后的文件绝对路径（物理路径）
-    assetsPublicPath: 'https://aisuda.github.io/amis-editor-demo/demo/', // 设置静态资源的引用路径（根域名+路径）
+    // assetsPublicPath: 'https://aisuda.github.io/amis-editor-demo/demo/', // 设置静态资源的引用路径（根域名+路径）
+    assetsPublicPath: 'https://amis.inrenping.com/', // 设置静态资源的引用路径（根域名+路径）
     assetsSubDirectory: '', // 资源引用二级路径
     productionSourceMap: false,
     productionGzip: false,
